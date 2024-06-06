@@ -1,13 +1,10 @@
-import stable_marriage, json
+import stable_marriage as sm, json
 
 
 if __name__ == "__main__":    
     f = open('data.json')
 
     data = json.load(f)
-
-    students = data['students']
-    schools = data['schools']
 
     # main program
     print("Welcome to the School Allocation System\n")
@@ -27,7 +24,7 @@ if __name__ == "__main__":
     elif answer == 2:
         serenading = "schools"
 
-    stable_marriage = Stable_Marriage(students, schools, serenading="school")
+    stable_marriage = sm.StableMarriage(data, serenaders=serenading)
 
     stable_marriage.run()
 

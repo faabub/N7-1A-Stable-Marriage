@@ -1,9 +1,15 @@
 class StableMarriage:
-    def __init__(self, students, schools, serenading="students"):
-        self.students = students
-        self.schools = schools
-        self.serenading = serenading
+    def __init__(self, data, serenaders="students", verbose=False):
+        self.students = set(Student(student['name'], student['preferences']) for student in data['students'])
+        self.schools = set(School(school['name'], school['preferences'], school['capacity']) for school in data['schools'])
+        self.serenaders = serenaders
         self.rounds = 0
+
+        #
+        self.serenaders = self.students if serenaders == "students" else self.schools
+        self.serenadees = self.schools if serenaders == "schools" else self.students
+        # debugging
+        self.verbose = verbose
 
     def all_students_matched(self):
         for student in self.students:
@@ -11,50 +17,46 @@ class StableMarriage:
                 return False
         return True
 
-    def no_more_capacity(self):
+    def all_schools_full(self):
         for school in self.schools:
             if not school.is_full():
                 return False
         return True
 
     def run(self):
-        while not self.all_students_matched() or self.no_more_capacity():
+        while not self.all_students_matched() or self.all_schools_full():
             # beginning of round/day
             self.rounds += 1
 
-            # morning
-            serenaded_schools = set()
-            for student in self.students:
-                if not student.is_free():
+            # morning: serenaders go serenade serenadees
+            serenaded_serenadees = set()
+            for serenader in self.serenaders:
+                if not serenader.is_free():
                     continue
 
-                serenaded_school = student.get_next_school()
-                while serenaded_school.is_full() and student.has_next_school():
-                    serenaded_school = student.get_next_school()
+                serenaded_name = serenader.get_next()
+                serenaded = next(element for element in self.serenadees if element.name == serenaded_name)
 
-                serenaded_schools.add(serenaded_school)
-                serenaded_school.serenading_students.append(student)
+                serenaded_serenadees.add(serenaded)
+                serenaded.serenaders.add(serenader)
 
-            # afternoon
-            for school in serenaded_schools:
-                school.match_students()
+            # afternoon/evening: serenadees keep the n=capacity most preferred serenaders and kicks the rest
+            for serenadee in serenaded_serenadees:
+                serenadee.keep_and_kick_serenaders()
 
-class School:
-    def __init__(self, name, capacity):
+class Serenadee:
+    def __init__(self, name, preferences, capacity=1):
         self.name = name
-        """name of the school"""
-
+        self.preferences = preferences
         self.capacity = capacity
-        """number of students the school can take"""
 
-        self.serenading_students = []
-        """students who are serenading this school in the midst of a given round"""
-
-        self.matched_students = set()
-        """students who have been matched to this school"""
+        self.serenaders = set()
+        """serenaders in the midst of a given round"""
+        self.matched = set()
+        """serenaders who are temporarily matched to this school"""
 
     def is_full(self):
-        return len(self.matched_students) >= self.capacity
+        return len(self.matched) >= self.capacity
 
     def match_students(self):
         '''
@@ -63,38 +65,33 @@ class School:
         '''
         if (
             self.capacity == 0
-            or len(self.serenading_students) == 0
+            or len(self.serenaders) == 0
             or self.is_full()
         ):
             return
         
-        for student in self.serenading_students:
-            if student in self.matched_students:
+        for serenader in self.serenaders:
+            if serenader in self.matched:
                 continue
 
-            student.school = self
-            self.matched_students.append(student)
+            serenader.school = self
+            self.matched.append(serenader)
 
-        self.serenading_students = []
+        self.serenaders = set()
 
-    def __str__(self):
-        return f"{self.name} with {self.capacity} seats"
-
-    def __repr__(self):
-        return f"{self.name} with {self.capacity} seats"
-
-
-class Student:
-    def __init__(self, name, preferences):
+class Serenader:
+    def __init__(self, name, preferences, capacity=1):
         self.name = name
         self.preferences = preferences
-        self.school = None
+        self.capacity = capacity
 
-    def __str__(self):
-        return f"Name: {self.name}"
+        self.serenadees = set()
 
     def is_free(self):
-        return self.school is None
+        return len(self.serenadees) != self.capacity
 
-    def get_next_school(self):
+    def get_next(self):
         return self.preferences.pop(0)
+
+    def has_next(self):
+        return len(self.preferences) > 0
