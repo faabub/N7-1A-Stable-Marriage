@@ -24,7 +24,7 @@ if __name__ == "__main__":
     elif answer == 2:
         serenading = "schools"
 
-    stable_marriage = sm.StableMarriage(data, serenaders=serenading)
+    stable_marriage = sm.StableMarriage(data, serenading=serenading)
 
     stable_marriage.run()
 
