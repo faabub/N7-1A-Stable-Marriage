@@ -34,7 +34,7 @@ if __name__ == "__main__":
     unmatched_students = stable_marriage.get_unmatched_students()
 
     print(f"\nSchool Allocation completed in {rounds} rounds\n")
-    print("The following students have been allocated to the following schools:")
+    print("The students have been allocated to the following schools:")
     for school in schools:
         print(
             f"{school.name} ({len(school.students)}/{school.capacity}):\n {school.students}"

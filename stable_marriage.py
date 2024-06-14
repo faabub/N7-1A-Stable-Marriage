@@ -53,6 +53,11 @@ class StableMarriage:
                 for school in data["schools"]
             }
 
+        self.serenadee_dict = {
+            serenadee.name: serenadee for serenadee in self.serenadees
+        }
+        """dictionary of serenadees with their names as keys for easy access"""
+
         # debugging
         self.verbose = verbose
 
@@ -103,12 +108,12 @@ class StableMarriage:
     def done(self):
         # exit conditions:
         # ! Important: should NOT stop only when all students have found any school or all schools are full
-        #   because there might be a better match for a student or a school so:
+        #   because there might be a better matching for a student or a school so:
         # - all serenaders are fulfilled
-        #   - schools serenading: all schools are full of their preferred students -> stops here
-        #   - students serenading: all students have found their preferred school -> stops here
-        #   - every preference list is empty
-        #     - means that there are no possible better matches so the algorithm is stable
+        #   - if schools serenading: all schools are full of their preferred students -> stops here
+        #   - if students serenading: all students have found their preferred school -> stops here
+        #   - or preference list is empty if the capacity is not reached
+        #     - means that there cannot be other matchings that are preferred -> algorithm is stable
         return all(serenader.is_fulfilled() for serenader in self.serenaders)
 
     def run(self):
@@ -127,21 +132,17 @@ class StableMarriage:
                 print("--------")
             for serenader in self.serenaders:
                 if self.verbose:
-                    print(f"- {serenader.name} serenades:")
+                    print(f"- {serenader.name}:")
 
-                if self.verbose:
-                    # check is not necessary and is already accounted for in "serenader.pop_next_preferences()"
-                    if serenader.is_fulfilled():
-                        print(f"{serenader.name} is already fulfilled")
+                if serenader.is_fulfilled():
+                    if self.verbose:
+                        print("fulfilled: fully matched or no more preferences left")
+                    continue
 
                 # serenade the n=capacity first preferences
                 for serenadee_name in serenader.pop_next_preferences():
-                    # find the serenadee from its name
-                    serenadee = next(
-                        serenadee
-                        for serenadee in self.serenadees
-                        if serenadee.name == serenadee_name
-                    )
+                    # find the serenadee from their name
+                    serenadee = self.serenadee_dict[serenadee_name]
                     serenadee.new_serenaders.add(serenader)
 
                     if self.verbose:
@@ -178,11 +179,11 @@ class Serenadee:
         self.new_serenaders = set()
         """new serenaders from a round"""
         self.matched_serenaders = []
-        """serenaders who are temporarily matched to the serenadee (and that are carried over to the next round)"""
+        """serenaders who are temporarily matched to this serenadee (and that are carried over to the next round)"""
 
     def match_and_reject(self):
         """
-        Match serenaders to the serenadee, given the serenadee's preferences.\n
+        Match serenaders to this serenadee, given this serenadee's preferences.\n
 
         Match the first `self.capacity` serenaders and reject the rest.\n
         Matched serenaders are added to `self.matched_serenaders` and have their `matched` updated to include `self`.\n
@@ -199,7 +200,7 @@ class Serenadee:
             print(f"current serenaders for {self.name}: {self.matched_serenaders}")
             print(f"new serenaders for {self.name}: {self.new_serenaders}")
 
-        # all serenaders that are matched to the serenadee (temporarily over capacity)
+        # all serenaders that are matched to this serenadee (temporarily over capacity)
         self.matched_serenaders = list(
             set(self.matched_serenaders).union(self.new_serenaders)
         )
@@ -261,7 +262,7 @@ class Serenader:
 
     def is_fulfilled(self):
         # very important to check if there are no more preferences left if the capacity is not reached:
-        # if there are serenadees that prefer `self` over their current match, the matching can be unstable since they could have been matched to `self`
+        # if there are serenadees that prefer `self` over their current serenaders, the matching can be unstable since they could have been matched to `self`
         return len(self.matched) >= self.capacity or len(self.preferences) == 0
 
     def available_capacity(self):
@@ -269,7 +270,7 @@ class Serenader:
 
     def pop_next_preferences(self):
         """
-        Get the next preferences to serenade that the serenader has not serenaded yet, if there is available capacity.\n
+        Get the next preferences to serenade that this serenader has not serenaded yet, if there is available capacity.\n
         There will be `min(len(self.preferences), self.available_capacity())` preferences returned.\n
         They are removed from `self.preferences`.\n
         """
