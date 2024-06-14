@@ -65,7 +65,10 @@ class StableMarriage:
             return {
                 School(
                     serenadee.name,
-                    [Student(s.name, serenadee.name) for s in serenadee.matched_serenaders],
+                    [
+                        Student(s.name, serenadee.name)
+                        for s in serenadee.matched_serenaders
+                    ],
                     serenadee.capacity,
                 )
                 for serenadee in self.serenadees
@@ -260,8 +263,8 @@ class Serenader:
         self.matched = set()
 
     def is_fulfilled(self):
-        # important to check if there are no more preferences left:
-        # if there are serenadees that prefer `self` over their current match, the matching is not stable
+        # very important to check if there are no more preferences left if the capacity is not reached:
+        # if there are serenadees that prefer `self` over their current match, the matching can be unstable since they could have been matched to `self`
         return len(self.matched) >= self.capacity or len(self.preferences) == 0
 
     def available_capacity(self):
