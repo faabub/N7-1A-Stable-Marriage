@@ -95,20 +95,18 @@ class StableMarriage:
     def all_serenaders_fulfilled(self):
         return all(serenader.is_fulfilled() for serenader in self.serenaders)
 
-    def all_serenadees_fulfilled(self):
-        return all(serenadee.is_fulfilled() for serenadee in self.serenadees)
+
 
     def run(self):
         # exit conditions:
+        # ! Important: should NOT stop only when all students have found a school or all schools are full
+        #   because there might be a better match for a student or a school so:
         # - all serenaders are fulfilled
-        #   - schools: all schools are full
-        #   - students: all students have found a school
-        # - all serenadees are fulfilled
-        #   - students: all students have found a school
-        #   - schools: all schools are full
-        while (
-            not self.all_serenaders_fulfilled() and not self.all_serenadees_fulfilled()
-        ):
+        #   - schools serenading: all schools are full of their preferred students -> stops here
+        #   - students serenading: all students have found their preferred school -> stops here
+        #   - every preference list is empty
+        #     - means that there are no more possible better matches so the algorithm is stable
+        while not self.all_serenaders_fulfilled():
             # beginning of round/day
             self.rounds += 1
             if self.verbose:
@@ -126,13 +124,9 @@ class StableMarriage:
                     print(f"- {serenader.name} serenades:")
 
                 if self.verbose:
-                    # these checks are not necessary and are already accounted for in "serenader.pop_next_preferences()"
-
+                    # check is not necessary and is already accounted for in "serenader.pop_next_preferences()"
                     if serenader.is_fulfilled():
                         print(f"{serenader.name} is already fulfilled")
-
-                    if len(serenader.preferences) == 0:
-                        print(f"{serenader.name} has no more preferences")
 
                 # serenade the n=capacity first preferences
                 for serenadee_name in serenader.pop_next_preferences():
@@ -260,14 +254,16 @@ class Serenader:
         self.matched = set()
 
     def is_fulfilled(self):
-        return len(self.matched) >= self.capacity
+        # important to check if there are no more preferences left:
+        # if there are serenadees that prefer `self` over their current match, the matching is not stable
+        return len(self.matched) >= self.capacity or len(self.preferences) == 0
 
     def available_capacity(self):
         return self.capacity - len(self.matched)
 
     def pop_next_preferences(self):
         """
-        Get the next preferences to serenade that the serenader has not serenaded yet.\n
+        Get the next preferences to serenade that the serenader has not serenaded yet, if there is available capacity.\n
         There will be `min(len(self.preferences), self.available_capacity())` preferences returned.\n
         They are removed from `self.preferences`.\n
         """
