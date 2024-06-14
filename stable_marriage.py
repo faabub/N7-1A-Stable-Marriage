@@ -180,9 +180,6 @@ class Serenadee:
         self.matched_serenaders = []
         """serenaders who are temporarily matched to the serenadee (and that are carried over to the next round)"""
 
-    def is_fulfilled(self):
-        return len(self.matched_serenaders) >= self.capacity
-
     def match_and_reject(self):
         """
         Match serenaders to the serenadee, given the serenadee's preferences.\n
