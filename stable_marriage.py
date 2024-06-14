@@ -6,8 +6,9 @@ class School:
 
 
 class Student:
-    def __init__(self, name):
+    def __init__(self, name, school):
         self.name = name
+        self.school = school
 
     def __repr__(self):
         return self.name
@@ -60,19 +61,21 @@ class StableMarriage:
 
     def get_schools(self):
         if self.serenader == "student":
+            # students serenade schools
             return {
                 School(
                     serenadee.name,
-                    [Student(s.name) for s in serenadee.matched_serenaders],
+                    [Student(s.name, serenadee.name) for s in serenadee.matched_serenaders],
                     serenadee.capacity,
                 )
                 for serenadee in self.serenadees
             }
         else:
+            # schools serenade students
             return {
                 School(
                     serenader.name,
-                    [Student(s.name) for s in serenader.matched],
+                    [Student(s.name, serenader.name) for s in serenader.matched],
                     serenader.capacity,
                 )
                 for serenader in self.serenaders
@@ -80,33 +83,33 @@ class StableMarriage:
 
     def get_unmatched_students(self):
         if self.serenader == "student":
+            # students serenade schools
             return {
-                Student(serenader.name)
+                Student(serenader.name, None)
                 for serenader in self.serenaders
-                if not serenader.is_fulfilled()
+                if len(serenader.matched) == 0
             }
         else:
+            # schools serenade students
             return {
-                Student(serenadee.name)
+                Student(serenadee.name, None)
                 for serenadee in self.serenadees
-                if not serenadee.is_fulfilled()
+                if len(serenadee.matched_serenaders) == 0
             }
 
-    def all_serenaders_fulfilled(self):
-        return all(serenader.is_fulfilled() for serenader in self.serenaders)
-
-
-
-    def run(self):
+    def done(self):
         # exit conditions:
-        # ! Important: should NOT stop only when all students have found a school or all schools are full
+        # ! Important: should NOT stop only when all students have found any school or all schools are full
         #   because there might be a better match for a student or a school so:
         # - all serenaders are fulfilled
         #   - schools serenading: all schools are full of their preferred students -> stops here
         #   - students serenading: all students have found their preferred school -> stops here
         #   - every preference list is empty
-        #     - means that there are no more possible better matches so the algorithm is stable
-        while not self.all_serenaders_fulfilled():
+        #     - means that there are no possible better matches so the algorithm is stable
+        return all(serenader.is_fulfilled() for serenader in self.serenaders)
+
+    def run(self):
+        while not self.done():
             # beginning of round/day
             self.rounds += 1
             if self.verbose:
@@ -157,6 +160,9 @@ class StableMarriage:
                 print()
                 print(f"Round {self.rounds} ends")
                 print("---------------------------------")
+
+        if self.verbose:
+            print("All serenaders are fulfilled.")
 
 
 class Serenadee:
