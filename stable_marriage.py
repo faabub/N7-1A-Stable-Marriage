@@ -261,8 +261,9 @@ class Serenader:
         self.matched = set()
 
     def is_fulfilled(self):
-        # very important to check if there are no more preferences left if the capacity is not reached:
-        # if there are serenadees that prefer `self` over their current serenaders, the matching can be unstable since they could have been matched to `self`
+        # It is very important to check if there are no more preferences left if the capacity is not reached.
+        # If there are serenadees that prefer `self` over their current serenaders,
+        # the matching can be unstable since they could have been matched to `self`.
         return len(self.matched) >= self.capacity or len(self.preferences) == 0
 
     def available_capacity(self):
