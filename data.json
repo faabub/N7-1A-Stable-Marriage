@@ -1,33 +1,35 @@
 {
     "students": [
         {
-            "name": "Student1",
-            "preferences": ["School1", "School2", "Hated School"]
+            "name": "S1",
+            "preferences": ["A", "B", "C"]
         },
         {
-            "name": "Student2",
-            "preferences": ["School2", "School1", "Hated School"]
+            "name": "S2",
+            "preferences": ["A", "B", "C"]
         },
         {
-            "name": "Student3",
-            "preferences": ["School1", "School2", "Hated School"]
+            "name": "S3",
+            "preferences": ["C", "A", "B"]
         }
     ],
     "schools": [
         {
-            "name": "School1",
-            "preferences": ["Student1", "Student2", "Student3"],
+            "name": "A",
+            "preferences": ["S2", "S1", "S3"],
             "capacity": 1
         },
         {
-            "name": "School2",
-            "preferences": ["Student2", "Student1", "Student3"],
-            "capacity": 2
+            "name": "B",
+            "preferences": ["S3", "S2", "S1"],
+            "capacity": 1
         },
         {
-            "name": "Hated School",
-            "preferences": ["Student2", "Student1", "Student3"],
+            "name": "C",
+            "preferences": ["S1", "S2", "S3"],
             "capacity": 1
         }
     ]
 }
+
+
