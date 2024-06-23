@@ -27,7 +27,7 @@
         {
             "name": "Hated School",
             "preferences": ["Student2", "Student1", "Student3"],
-            "capacity": 2
+            "capacity": 1
         }
     ]
 }

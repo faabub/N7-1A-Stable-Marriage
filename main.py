@@ -1,7 +1,5 @@
 import stable_marriage as sm, json
 
-VERBOSE = True
-
 if __name__ == "__main__":
     f = open("data.json")
 
@@ -10,22 +8,32 @@ if __name__ == "__main__":
     # main program
     print("Welcome to the School Allocation System")
     answer = 0
-    while answer not in range(1, 3):
+    while answer not in range(1, 5):
         try:
             print("Please select an option from the following:")
             print("-------------------------------------------")
             print("1. Students serenade schools")
             print("2. Schools serenade students")
+            print("3. Students serenade schools (verbose)")
+            print("4. Schools serenade students (verbose)")
             answer = int(input("Enter your choice: "))
         except:
             continue
 
     if answer == 1:
         serenading = "student"
+        verbose = False
     elif answer == 2:
         serenading = "school"
+        verbose = False
+    elif answer == 3:
+        serenading = "student"
+        verbose = True
+    elif answer == 4:
+        serenading = "school"
+        verbose = True
 
-    stable_marriage = sm.StableMarriage(data, serenader=serenading, verbose=VERBOSE)
+    stable_marriage = sm.StableMarriage(data, serenader=serenading, verbose=verbose)
 
     stable_marriage.run()
 
